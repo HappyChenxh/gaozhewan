@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>学生列表</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <h1>学生列表</h1>
+    <table id="studentTable">
+        <thead>
+            <tr>
+                <th>姓名</th>
+                <th>年龄</th>
+                <th>邮箱</th>
+            </tr>
+        </thead>
+        <tbody>
+            <!-- 学生数据将动态插入到这里 -->
+        </tbody>
+    </table>
+
+    <script>
+        function fetchStudents() {
+            fetch('http://localhost:8080/api/students')
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector('#studentTable tbody');
+                    tbody.innerHTML = ''; // 清空现有数据
+                    data.forEach(student => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${student.name}</td>
+                            <td>${student.age}</td>
+                            <td>${student.email}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // 页面加载时获取学生数据
+        window.onload = fetchStudents;
+    </script>
+</body>
+</html>
