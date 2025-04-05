@@ -7,6 +7,8 @@
 </head>
 <body>
     <h1>学生列表</h1>
+    <!-- 新增学生按钮 -->
+    <button id="addStudentButton" onclick="window.location.href='/addStudent.html'">新增学生</button>
     <table id="studentTable">
         <thead>
             <tr>
@@ -20,14 +22,24 @@
         </tbody>
     </table>
 
+    <!-- 分页控件 -->
+    <div id="pagination">
+        <button id="prevPage">上一页</button>
+        <span id="pageInfo">第 1 页</span>
+        <button id="nextPage">下一页</button>
+    </div>
+
     <script>
-        function fetchStudents() {
-            fetch('http://localhost:8080/api/students')
+        let currentPage = 1;
+        const pageSize = 10; // 每页显示10条数据
+
+        function fetchStudents(pageIndex) {
+            fetch(`http://localhost:8080/api/students/page?pageSize=${pageSize}&pageIndex=${pageIndex}`)
                 .then(response => response.json())
                 .then(data => {
                     const tbody = document.querySelector('#studentTable tbody');
                     tbody.innerHTML = ''; // 清空现有数据
-                    data.forEach(student => {
+                    data.students.forEach(student => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
                             <td>${student.name}</td>
@@ -36,12 +48,32 @@
                         `;
                         tbody.appendChild(row);
                     });
+                    const totalPages = Math.ceil(data.totalCount / pageSize);
+                    document.getElementById('pageInfo').innerText = `第 ${pageIndex} 页，共 ${totalPages} 页`;
+
+                    // 控制翻页按钮的禁用状态
+                    document.getElementById('prevPage').disabled = pageIndex <= 1;
+                    document.getElementById('nextPage').disabled = pageIndex >= totalPages;
                 })
                 .catch(error => console.error('Error:', error));
         }
 
-        // 页面加载时获取学生数据
-        window.onload = fetchStudents;
+        // 页面加载时获取第一页学生数据
+        window.onload = () => fetchStudents(currentPage);
+
+        // 上一页按钮点击事件
+        document.getElementById('prevPage').addEventListener('click', () => {
+            if (currentPage > 1) {
+                currentPage--;
+                fetchStudents(currentPage);
+            }
+        });
+
+        // 下一页按钮点击事件
+        document.getElementById('nextPage').addEventListener('click', () => {
+            currentPage++;
+            fetchStudents(currentPage);
+        });
     </script>
 </body>
 </html>

@@ -10,4 +10,13 @@
     <insert id="insertStudent" parameterType="com.example.gaozhewan.model.Student">
         INSERT INTO students (name, age, email) VALUES (#{name}, #{age}, #{email})
     </insert>
+    <!-- 恢复分页查询 -->
+    <select id="findStudentsByPage" resultType="com.example.gaozhewan.model.Student">
+        SELECT id, name, age, email FROM students
+        LIMIT #{pageSize} OFFSET #{offset}
+    </select>
+    <!-- 恢复总记录数查询 -->
+    <select id="getTotalCount" resultType="int">
+        SELECT COUNT(*) FROM students
+    </select>
 </mapper>
