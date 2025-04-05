@@ -8,7 +8,7 @@
 <body>
     <h1>学生列表</h1>
     <!-- 新增学生按钮 -->
-    <button id="addStudentButton" onclick="window.location.href='/addStudent.html'">新增学生</button>
+    <button id="addStudentButton" onclick="showAddStudentModal()">新增学生</button>
     <table id="studentTable">
         <thead>
             <tr>
@@ -27,6 +27,24 @@
         <button id="prevPage">上一页</button>
         <span id="pageInfo">第 1 页</span>
         <button id="nextPage">下一页</button>
+    </div>
+
+    <!-- 新增学生弹窗 -->
+    <div id="addStudentModal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 20px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); border-radius: 8px;">
+        <h2>新增学生信息</h2>
+        <form id="studentForm">
+            <label for="name">姓名:</label>
+            <input type="text" id="name" name="name" required>
+            
+            <label for="age">年龄:</label>
+            <input type="number" id="age" name="age" required>
+            
+            <label for="email">邮箱:</label>
+            <input type="email" id="email" name="email" required>
+            
+            <button type="button" onclick="submitForm()">提交</button>
+            <button type="button" onclick="hideAddStudentModal()">取消</button>
+        </form>
     </div>
 
     <script>
@@ -74,6 +92,38 @@
             currentPage++;
             fetchStudents(currentPage);
         });
+
+        function showAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'block';
+        }
+
+        function hideAddStudentModal() {
+            document.getElementById('addStudentModal').style.display = 'none';
+        }
+
+        function submitForm() {
+            const name = document.getElementById('name').value;
+            const age = document.getElementById('age').value;
+            const email = document.getElementById('email').value;
+
+            fetch('http://localhost:8080/api/students', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ name, age, email })
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('学生信息新增成功！');
+                    hideAddStudentModal();
+                    fetchStudents(currentPage); // 刷新学生列表
+                } else {
+                    alert('新增失败，请重试！');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
     </script>
 </body>
 </html>

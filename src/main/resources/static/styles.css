@@ -72,3 +72,24 @@ tr:hover {
 tbody tr:nth-child(even) {
     background-color: #f9f9f9;
 }
+
+/* 新增弹窗样式 */
+#addStudentModal {
+    z-index: 1000;
+    width: 400px;
+}
+
+#addStudentModal button {
+    margin-top: 10px;
+    width: auto;
+    padding: 8px 16px;
+}
+
+#addStudentModal button[type="button"] {
+    background-color: #ccc;
+    margin-left: 10px;
+}
+
+#addStudentModal button[type="button"]:hover {
+    background-color: #bbb;
+}
