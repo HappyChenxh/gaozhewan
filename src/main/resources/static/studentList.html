@@ -4,11 +4,21 @@
     <meta charset="UTF-8">
     <title>学生列表</title>
     <link rel="stylesheet" href="styles.css">
+    <style>
+        #logoutButton {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 100px;
+        }
+    </style>
 </head>
 <body>
     <h1>学生列表</h1>
     <!-- 新增学生按钮 -->
     <button id="addStudentButton" onclick="showAddStudentModal()">新增学生</button>
+    <!-- 退出登录按钮 -->
+    <button id="logoutButton" onclick="logout()">退出登录</button>
     <table id="studentTable">
         <thead>
             <tr>
@@ -52,28 +62,39 @@
         const pageSize = 10; // 每页显示10条数据
 
         function fetchStudents(pageIndex) {
-            fetch(`http://localhost:8080/api/students/page?pageSize=${pageSize}&pageIndex=${pageIndex}`)
-                .then(response => response.json())
-                .then(data => {
-                    const tbody = document.querySelector('#studentTable tbody');
-                    tbody.innerHTML = ''; // 清空现有数据
-                    data.students.forEach(student => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${student.name}</td>
-                            <td>${student.age}</td>
-                            <td>${student.email}</td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                    const totalPages = Math.ceil(data.totalCount / pageSize);
-                    document.getElementById('pageInfo').innerText = `第 ${pageIndex} 页，共 ${totalPages} 页`;
+            const token = localStorage.getItem('token');
+            fetch(`http://localhost:8080/api/students/page?pageSize=${pageSize}&pageIndex=${pageIndex}`, {
+                headers: {
+                    'Authorization': 'Bearer ' + token
+                }
+            })
+            .then(response => {
+                if (response.status === 401) {
+                    window.location.href = '/login.html';
+                    return;
+                }
+                return response.json();
+            })
+            .then(data => {
+                const tbody = document.querySelector('#studentTable tbody');
+                tbody.innerHTML = ''; // 清空现有数据
+                data.students.forEach(student => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${student.name}</td>
+                        <td>${student.age}</td>
+                        <td>${student.email}</td>
+                    `;
+                    tbody.appendChild(row);
+                });
+                const totalPages = Math.ceil(data.totalCount / pageSize);
+                document.getElementById('pageInfo').innerText = `第 ${pageIndex} 页，共 ${totalPages} 页`;
 
-                    // 控制翻页按钮的禁用状态
-                    document.getElementById('prevPage').disabled = pageIndex <= 1;
-                    document.getElementById('nextPage').disabled = pageIndex >= totalPages;
-                })
-                .catch(error => console.error('Error:', error));
+                // 控制翻页按钮的禁用状态
+                document.getElementById('prevPage').disabled = pageIndex <= 1;
+                document.getElementById('nextPage').disabled = pageIndex >= totalPages;
+            })
+            .catch(error => console.error('Error:', error));
         }
 
         // 页面加载时获取第一页学生数据
@@ -106,10 +127,12 @@
             const age = document.getElementById('age').value;
             const email = document.getElementById('email').value;
 
+            const token = localStorage.getItem('token');
             fetch('http://localhost:8080/api/students', {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token
                 },
                 body: JSON.stringify({ name, age, email })
             })
@@ -124,6 +147,12 @@
             })
             .catch(error => console.error('Error:', error));
         }
+
+        function logout() {
+            localStorage.removeItem('token');
+            window.location.href = '/login.html';
+        }
+
     </script>
 </body>
 </html>
